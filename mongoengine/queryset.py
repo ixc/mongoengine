@@ -303,8 +303,7 @@ class QuerySet(object):
 
     def _clone(self, **kwargs):
         """Django's generic views needs this function. You need to specify ``template_name`` in the generic view configuration in order to avoid the Django code which introspects the (non-existent in this case) Django model."""
-        #why clone?
-        return self
+        return copy.copy(self)
 
     def ensure_index(self, key_or_list, drop_dups=False, background=False,
         **kwargs):
