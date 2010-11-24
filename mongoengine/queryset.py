@@ -301,9 +301,27 @@ class QuerySet(object):
             self._mongo_query.update(self._initial_query)
         return self._mongo_query
 
-    def _clone(self, **kwargs):
+    def _clone(self, klass=None, setup=False, **kwargs):
         """Django's generic views needs this function. You need to specify ``template_name`` in the generic view configuration in order to avoid the Django code which introspects the (non-existent in this case) Django model."""
-        return copy.copy(self)
+        if klass is None:
+            klass = self.__class__
+        c = klass(document=self._document, collection=self._collection_obj)
+        
+        c._accessed_collection = self._accessed_collection
+        
+        #not 100% sure deepcopy is necessary for all of these.
+        c._mongo_query = copy.deepcopy(self._mongo_query)
+        c._query_obj = copy.deepcopy(self._query_obj)
+        c._initial_query = copy.deepcopy(self._initial_query)
+        c._where_clause = copy.deepcopy(self._where_clause)
+        c._loaded_fields = copy.deepcopy(self._loaded_fields)
+        
+        c._ordering = self._ordering
+        c._snapshot = self._snapshot
+        c._timeout = self._timeout
+
+        c.__dict__.update(kwargs)
+        return c
 
     def ensure_index(self, key_or_list, drop_dups=False, background=False,
         **kwargs):
