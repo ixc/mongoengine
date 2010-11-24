@@ -307,18 +307,20 @@ class QuerySet(object):
             klass = self.__class__
         c = klass(document=self._document, collection=self._collection_obj)
         
-        c._accessed_collection = self._accessed_collection
         
         #not 100% sure deepcopy is necessary for all of these.
+        c._accessed_collection = copy.deepcopy(self._accessed_collection)
         c._mongo_query = copy.deepcopy(self._mongo_query)
         c._query_obj = copy.deepcopy(self._query_obj)
         c._initial_query = copy.deepcopy(self._initial_query)
         c._where_clause = copy.deepcopy(self._where_clause)
         c._loaded_fields = copy.deepcopy(self._loaded_fields)
-        
-        c._ordering = self._ordering
-        c._snapshot = self._snapshot
+        c._ordering = copy.deepcopy(self._ordering)
+        c._snapshot = copy.deepcopy(self._snapshot)
         c._timeout = self._timeout
+        c._cursor_obj = copy.copy(self._cursor_obj)
+        c._limit = copy.deepcopy(self._limit)
+        c._skip = copy.deepcopy(self._skip)
 
         c.__dict__.update(kwargs)
         return c
