@@ -691,6 +691,10 @@ class QuerySet(object):
     def __len__(self):
         return self.count()
 
+    def hint(self, index):
+        self._cursor.hint(index)
+        return self
+
     def map_reduce(self, map_f, reduce_f, finalize_f=None, limit=None,
                    scope=None, keep_temp=False):
         """Perform a map/reduce query using the current query spec
