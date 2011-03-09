@@ -89,7 +89,7 @@ class BaseField(object):
         if self.choices is not None:
             try:
                 choices = dict(self.choices)
-            except TypeError:
+            except (TypeError, ValueError):
                 choices = self.choices
 
             if value not in choices:
