@@ -343,7 +343,7 @@ class ListField(BaseField):
         try:
             [self.field.validate(item) for item in value]
         except Exception, err:
-            raise ValidationError('Invalid ListField item (%s)' % str(item))
+            raise ValidationError('Invalid ListField item (%s)' % unicode(item))
 
     def prepare_query_value(self, op, value):
         if op in ('set', 'unset'):
@@ -461,6 +461,8 @@ class ReferenceField(BaseField):
             if id_ is None:
                 raise ValidationError('You can only reference documents once '
                                       'they have been saved to the database')
+        elif isinstance(document, pymongo.dbref.DBRef):
+            return document
         else:
             id_ = document
 
