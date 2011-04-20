@@ -1,5 +1,6 @@
 from queryset import QuerySet, QuerySetManager
 from queryset import DoesNotExist, MultipleObjectsReturned
+from sorteddict import SortedDict
 
 import sys
 import pymongo
@@ -21,7 +22,9 @@ class BaseField(object):
     may be added to subclasses of `Document` to define a document's schema.
     """
 
-    # Fields may have _types inserted into indexes by default 
+    creation_counter = 0
+
+    # Fields may have _types inserted into indexes by default
     _index_with_types = True
     _geo_index = False
 
@@ -41,6 +44,12 @@ class BaseField(object):
         self.primary_key = primary_key
         self.validation = validation
         self.choices = choices
+        self.creation_counter = BaseField.creation_counter # (copy to local)
+        BaseField.creation_counter += 1 # (increment global)
+
+    def __cmp__(self, other):
+        return cmp(self.creation_counter, other.creation_counter)
+
 
     def __get__(self, instance, owner):
         """Descriptor for retrieving a value from a field in a document. Do 
@@ -144,7 +153,7 @@ class DocumentMetaclass(type):
         if metaclass and issubclass(metaclass, DocumentMetaclass):
             return super_new(cls, name, bases, attrs)
 
-        doc_fields = {}
+        doc_fields = SortedDict()
         class_name = [name]
         superclasses = {}
         simple_class = True
@@ -183,13 +192,19 @@ class DocumentMetaclass(type):
         attrs['_superclasses'] = superclasses
 
         # Add the document's fields to the _fields attribute
+        declared_fields = {}
         for attr_name, attr_value in attrs.items():
             if hasattr(attr_value, "__class__") and \
                issubclass(attr_value.__class__, BaseField):
                 attr_value.name = attr_name
                 if not attr_value.db_field:
                     attr_value.db_field = attr_name
-                doc_fields[attr_name] = attr_value
+                declared_fields[attr_name] = attr_value
+
+        # sort fields based on creation_counter
+        by_value = lambda x, y: cmp(x[1], y[1])
+        doc_fields.update(
+            SortedDict(sorted(declared_fields.items(), by_value)))
         attrs['_fields'] = doc_fields
 
         new_class = super_new(cls, name, bases, attrs)
