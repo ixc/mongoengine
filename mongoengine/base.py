@@ -473,7 +473,7 @@ class BaseDocument(object):
             if class_name not in subclasses:
                 # Type of document is probably more generic than the class
                 # that has been queried to return this SON
-                return None
+                raise UnknownDocumentType(class_name, cls._class_name, subclasses)
             cls = subclasses[class_name]
 
         present_fields = data.keys()
@@ -501,3 +501,18 @@ if sys.version_info < (2, 5):
 else:
     def subclass_exception(name, parents, module):
         return type(name, parents, {'__module__': module})
+
+class UnknownDocumentType(Exception):
+    def __init__(self, cls, class_name, subclasses):
+        self.cls = cls
+        self.class_name = class_name
+        self.subclasses = subclasses
+
+    def __str__(self):
+        return """
+        Could not determine the class of the document. _cls attribute is "%s", which does not
+        correlate with the class name ("%s") nor with the subclasses ("%s").
+
+        Was the inheritance hierarchy changed after the initial data entry? You might need to
+        do the migrations.
+        """ % (self.cls, self.class_name, self.subclasses)
