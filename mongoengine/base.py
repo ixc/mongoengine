@@ -504,10 +504,13 @@ class BaseDocument(object):
         return obj
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__) and hasattr(other, 'id'):
-            if self.id == other.id:
+        if isinstance(other, self.__class__) and hasattr(other, 'pk'):
+            if self.pk == other.pk:
                 return True
         return False
+
+    def __hash__(self):
+        return hash(self.pk)
 
 if sys.version_info < (2, 5):
     # Prior to Python 2.5, Exception was an old-style class
@@ -517,7 +520,7 @@ else:
     def subclass_exception(name, parents, module):
         return type(name, parents, {'__module__': module})
 
-class UnknownDocumentType(Exception):
+class DocumentType(Exception):
     def __init__(self, cls, class_name, subclasses):
         self.cls = cls
         self.class_name = class_name
