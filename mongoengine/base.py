@@ -520,7 +520,7 @@ else:
     def subclass_exception(name, parents, module):
         return type(name, parents, {'__module__': module})
 
-class DocumentType(Exception):
+class UnknownDocumentType(Exception):
     def __init__(self, cls, class_name, subclasses):
         self.cls = cls
         self.class_name = class_name
