@@ -504,13 +504,22 @@ class BaseDocument(object):
         return obj
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__) and hasattr(other, 'pk'):
-            if self.pk == other.pk:
-                return True
-        return False
+        try:
+            if isinstance(other, self.__class__):
+                if self.pk == other.pk:
+                    return True
+            return False
+        except KeyError:
+            return sorted(self.to_mongo().items()) \
+                    == sorted(other.to_mongo().items())
 
     def __hash__(self):
-        return hash(self.pk)
+        try:
+            return hash(getattr(self, self._meta['id_field']))
+        except KeyError:
+            # For embedded documents and such which don't have
+            # pk
+            return hash(str(sorted(self.to_mongo().items())))
 
 if sys.version_info < (2, 5):
     # Prior to Python 2.5, Exception was an old-style class
