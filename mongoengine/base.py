@@ -252,6 +252,7 @@ class TopLevelDocumentMetaclass(DocumentMetaclass):
 
         id_field = None
         base_indexes = []
+        base_unique_indexes = []
         base_meta = {}
 
         # Subclassed documents inherit collection from superclass
@@ -266,6 +267,7 @@ class TopLevelDocumentMetaclass(DocumentMetaclass):
 
                 id_field = id_field or base._meta.get('id_field')
                 base_indexes += base._meta.get('indexes', [])
+                base_unique_indexes += base._meta.get('unique_indexes', [])
 
         meta = {
             'collection': collection,
@@ -273,6 +275,7 @@ class TopLevelDocumentMetaclass(DocumentMetaclass):
             'max_size': None,
             'ordering': [], # default ordering applied at runtime
             'indexes': [], # indexes to be ensured at runtime
+            'unique_indexes': base_unique_indexes,
             'id_field': id_field,
             'index_background': False,
             'index_drop_dups': False,
@@ -297,7 +300,7 @@ class TopLevelDocumentMetaclass(DocumentMetaclass):
                         for spec in meta['indexes']] + base_indexes
         new_class._meta['indexes'] = user_indexes
 
-        unique_indexes = []
+        unique_indexes = meta['unique_indexes']
         for field_name, field in new_class._fields.items():
             # Generate a list of indexes needed by uniqueness constraints
             if field.unique:
