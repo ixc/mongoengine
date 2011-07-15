@@ -273,6 +273,12 @@ class QuerySet(object):
     providing :class:`~mongoengine.Document` objects as the results.
     """
 
+    def using(self, alias):
+        """
+        Selects which database this QuerySet should excecute it's query against.
+        """
+        return self
+
     def __init__(self, document, collection):
         self._document = document
         self._collection_obj = collection
