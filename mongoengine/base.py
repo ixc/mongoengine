@@ -491,7 +491,7 @@ class BaseDocument(object):
             if class_name not in subclasses:
                 # Type of document is probably more generic than the class
                 # that has been queried to return this SON
-                raise UnknownDocumentType(class_name, cls._class_name, subclasses)
+                return None
             cls = subclasses[class_name]
 
         present_fields = data.keys()
