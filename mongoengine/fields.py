@@ -308,7 +308,10 @@ class ListField(BaseField):
                     # Dereference DBRefs
                     if isinstance(value, (pymongo.dbref.DBRef)):
                         value = _get_db().dereference(value)
-                        deref_list.append(referenced_type._from_son(value))
+                        try:
+                            deref_list.append(referenced_type._from_son(value))
+                        except AttributeError: #NoneType' object has no attribute 'get', ie Referenced item doesn't exist...
+                            pass
                     else:
                         deref_list.append(value)
                 instance._data[self.name] = deref_list
