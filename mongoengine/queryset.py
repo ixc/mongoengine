@@ -206,7 +206,7 @@ class QNode(object):
     def _combine(self, other, operation):
         """Combine this node with another node into a QCombination object.
         """
-        if other.empty:
+        if getattr(other, 'empty', None):
             return self
 
         if self.empty:
@@ -243,7 +243,8 @@ class QCombination(QNode):
 
     def accept(self, visitor):
         for i in range(len(self.children)):
-            self.children[i] = self.children[i].accept(visitor)
+            if isinstance(self.children[i], QNode):
+                self.children[i] = self.children[i].accept(visitor)
 
         return visitor.visit_combination(self)
 
